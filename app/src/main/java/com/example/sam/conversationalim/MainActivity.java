@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,10 +13,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends Activity {
     EditText et1, et2;
     boolean isOpen = false;
     AboutFrag f1;
+
+    //JSON final Variables
+    private static final String TAG_SELF = "self", TAG_NEW = "new",
+            TAG_MESSAGE = "message", TAG_EXIT = "exit";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,5 +67,38 @@ public class MainActivity extends Activity {
 
     public void resetTextEt2(View view) {
         et2.setText("");
+    }
+
+    public class JSONDataAsyncTask extends AsyncTask<String, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+
+            //Not sure how to do this yet, working on it.
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+        }
+    }
+    private void parseMessage(final String msg){
+
+        try{
+            JSONObject jObj = new JSONObject();
+            String flag = jObj.getString("flag");
+
+            if (flag.equalsIgnoreCase(TAG_NEW)){
+                String name = jObj.getString("sender");
+                String message = jObj.getString("message");
+
+            }
+
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
