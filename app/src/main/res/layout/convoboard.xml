@@ -9,7 +9,7 @@
     android:orientation="vertical" >
 
     <ListView
-        android:id="@+id/list_view_messages"
+        android:id="@+id/list"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -18,6 +18,16 @@
         android:transcriptMode="alwaysScroll"
         android:stackFromBottom="true">
     </ListView>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="123dp"
+        android:layout_height="wrap_content"
+        android:text="New Message"
+        android:id="@+id/newMessage"
+        android:layout_gravity="right"
+        android:onClick="addExampleUser"
+        />
 
 
 </LinearLayout>

@@ -40,22 +40,38 @@ public class MainActivity extends Activity {
 
     }
 
+    public void login(){
+        Button b2 = (Button) findViewById(R.id.nextButton);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(v.getContext(), messageBoardActivity.class); //will need to change
+                startActivity(intent);
+            }
+        });
+
+
+    }
+
     public void addListenerOnButton() {
-        b = (Button) findViewById(R.id.button);
+        b = (Button) findViewById(R.id.nextButton);
         b.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
-                    Intent intent = new Intent();
-                    intent.setClass(v.getContext(), messageBoardActivity.class);
-                    String str = et2.getText().toString();
-                    intent.putExtra("mystring",str);
-                    startActivity(intent);
+                Intent intent = new Intent();
+                intent.setClass(v.getContext(), messageBoardActivity.class);
+                String str = et2.getText().toString();
+                intent.putExtra("mystring", str);
+                startActivity(intent);
+
 
 
             }
         });
+
     }
 
     /*

@@ -65,9 +65,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Next"
-            android:id="@+id/button"
+            android:id="@+id/nextButton"
             android:layout_marginBottom="40dp"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:onClick="login"/>
     </RelativeLayout>
 </RelativeLayout>

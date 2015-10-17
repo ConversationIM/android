@@ -14,4 +14,8 @@ public class Conversation {
     public void addMessage(Message m){
 
     }
+
+    public User getOtherPerson() {
+        return otherPerson;
+    }
 }
