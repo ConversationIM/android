@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
     EditText et1, et2;
     boolean isOpen = false;
     AboutFrag f1;
+    Button b;
 
     //JSON final Variables
     private static final String TAG_SELF = "self", TAG_NEW = "new",
@@ -34,7 +35,27 @@ public class MainActivity extends Activity {
         et1 = (EditText) findViewById(R.id.editText);
         et2 = (EditText) findViewById(R.id.editText2);
 
+        addListenerOnButton();
 
+
+    }
+
+    public void addListenerOnButton() {
+        b = (Button) findViewById(R.id.button);
+        b.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                    Intent intent = new Intent();
+                    intent.setClass(v.getContext(), SecondActivity.class);
+                    String str = et2.getText().toString();
+                    intent.putExtra("mystring",str);
+                    startActivity(intent);
+
+
+            }
+        });
     }
 
     /*
