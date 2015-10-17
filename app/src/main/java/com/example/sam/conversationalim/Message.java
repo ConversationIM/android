@@ -6,7 +6,7 @@ public class Message {
     private String recipient;
     private String timeStamp;
     private String message;
-    private String flag;
+    private boolean flag;
 
     public Message(){
     }
@@ -40,15 +40,15 @@ public class Message {
         return message;
     }
 
-    public String getFlag() {
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean flag() {
         return flag;
     }
 
-    public void setFlag(String flag) {
+    public void setFlag(boolean flag) {
         this.flag = flag;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }
