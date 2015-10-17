@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                     Intent intent = new Intent();
-                    intent.setClass(v.getContext(), SecondActivity.class);
+                    intent.setClass(v.getContext(), messageBoardActivity.class);
                     String str = et2.getText().toString();
                     intent.putExtra("mystring",str);
                     startActivity(intent);
