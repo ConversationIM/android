@@ -49,11 +49,21 @@ public class convoBoardActivity extends Activity{
                 startActivity(intent);
             }
         });
+
+        View v = this.findViewById(android.R.id.content);
+
+        addDemoUser(v);
     }
 
     public void addExampleUser(View view){
             User dummy = new User("Victor", "pass");
             newConversation(dummy);
+    }
+
+    public void addDemoUser(View view)
+    {
+        User demo = new User("Demo", "pass");
+        newConversation(demo);
     }
 
     private void newConversation(User user){ //new conversation with a user
