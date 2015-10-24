@@ -1,48 +1,35 @@
 package com.example.sam.conversationalim;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import org.w3c.dom.Text;
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.util.ArrayList;
-
 
 public class messageBoardActivity extends Activity {
 
     ListView lv;
-    ArrayList<String> listItems = new ArrayList<>();
-    ArrayAdapter<String> adapter;
-
+    ArrayList<Message> listItems = new ArrayList<>();
+    ArrayList<String> messageList = new ArrayList<>();
+    ArrayAdapter<Message> adapter;
+    ArrayAdapter<String> messageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.convoboard);
+        setContentView(R.layout.messageboard);
 
         adapter=new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,
                 listItems);
-        lv = (ListView) findViewById(R.id.list);
-        lv.setAdapter(adapter);
+        messageAdapter=new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1,
+                messageList);
+        lv = (ListView) findViewById(R.id.list_view_messages);
+        lv.setAdapter(messageAdapter);
     }
-
-    public void addExampleUser(View view){
-            User dummy = new User("Victor", "pass");
-            newConversation(dummy);
-    }
-
-    private void newConversation(User user){ //new conversation with a user
-        adapter.add(user.getUserName());
-
-    }
-
 
 
 }
