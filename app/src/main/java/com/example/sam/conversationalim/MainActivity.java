@@ -105,37 +105,4 @@ public class MainActivity extends Activity {
     public void resetTextEt2(View view) {
         et2.setText("");
     }
-
-    public class JSONDataAsyncTask extends AsyncTask<String, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(String... strings) {
-
-            //Not sure how to do this yet, working on it.
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-        }
-    }
-    private void parseMessage(final String msg){
-
-        try{
-            JSONObject jObj = new JSONObject();
-            String flag = jObj.getString("flag");
-
-            if (flag.equalsIgnoreCase(TAG_NEW)){
-                String name = jObj.getString("sender");
-                String message = jObj.getString("message");
-
-            }
-
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 }
