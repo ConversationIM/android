@@ -28,6 +28,8 @@ public class messageBoardActivity extends Activity {
     ArrayAdapter<String> messageAdapter;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +53,10 @@ public class messageBoardActivity extends Activity {
         });
 
         adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1,
+                R.layout.aligned_right,
                 listItems);
         messageAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1,
+                R.layout.aligned_right,
                 messageList);
         lv = (ListView) findViewById(R.id.list_view_messages);
         lv.setAdapter(messageAdapter);
@@ -83,6 +85,12 @@ public class messageBoardActivity extends Activity {
     public void sendMessage(JSONObject JSON){
 
     }
+
+    public Message decodeMessage(JSONObject JSON){
+        refreshListView(new Message(JSON));
+        return new Message(JSON);
+    }
+
 
     public void appendListView(Message m){
         adapter.add(m);

@@ -29,6 +29,21 @@ public class Message {
             sender = e.toString();
         }
     }
+
+    public Message(JSONObject message){
+
+        try {
+            this.message = message.getString("message");
+            room = message.getString("room");
+            sender = message.getString("sender");
+        }
+        catch (JSONException e){
+            this.message = e.toString();
+            room = e.toString();
+            sender = e.toString();
+        }
+    }
+
     public Message(String message){
 
 
