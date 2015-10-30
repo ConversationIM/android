@@ -8,6 +8,7 @@ public class Message {
     private String sender;
     private String message;
     private String room;
+    private boolean left;
 
     public Message(){
 
@@ -83,4 +84,11 @@ public class Message {
         this.message = message;
     }
 
+    public boolean left() {
+        return left;
+    }
+
+    public void setLeft(boolean left) {
+        this.left = left;
+    }
 }
