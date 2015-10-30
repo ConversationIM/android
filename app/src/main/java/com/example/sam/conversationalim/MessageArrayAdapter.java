@@ -17,8 +17,10 @@ public class MessageArrayAdapter extends ArrayAdapter {
     private List messageList = new ArrayList();
     private LinearLayout singleMessageContainer;
 
+
     public void add(Message m){
         messageList.add(m);
+        super.add(m);
     }
 
     public MessageArrayAdapter(Context context, int textViewResourceId) {
@@ -33,6 +35,10 @@ public class MessageArrayAdapter extends ArrayAdapter {
         return (Message) this.messageList.get(index);
     }
 
+    public void refreshListView(Message m){
+        messageList.set(messageList.size() - 1, m);
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
         if (row == null) {
@@ -43,7 +49,7 @@ public class MessageArrayAdapter extends ArrayAdapter {
         Message chatMessageObj = get(position);
         lv = (TextView) row.findViewById(R.id.singleMessage);
         lv.setText(chatMessageObj.getMessage());
-        lv.setBackgroundResource(chatMessageObj.left() ? R.drawable.bubble_a : R.drawable.bubble_b);
+        lv.setBackgroundResource(chatMessageObj.left() ? R.drawable.a : R.drawable.b);
         singleMessageContainer.setGravity(chatMessageObj.left() ? Gravity.LEFT : Gravity.RIGHT);
         return row;
     }

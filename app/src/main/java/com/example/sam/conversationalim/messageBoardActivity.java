@@ -22,10 +22,7 @@ import java.util.ArrayList;
 public class messageBoardActivity extends Activity {
 
     ListView lv;
-    ArrayList<Message> listItems = new ArrayList<>();
-    ArrayList<String> messageList = new ArrayList<>();
-    ArrayAdapter<Message> adapter;
-    ArrayAdapter<String> messageAdapter;
+    private MessageArrayAdapter messageAdapter;
 
 
 
@@ -52,15 +49,10 @@ public class messageBoardActivity extends Activity {
             }
         });
 
-        adapter = new ArrayAdapter<>(this,
-                R.layout.aligned_right,
-                listItems);
-        messageAdapter = new ArrayAdapter<>(this,
-                R.layout.aligned_right,
-                messageList);
+        messageAdapter = new MessageArrayAdapter(getApplicationContext(), R.layout.activity_chat_singlemessage);
         lv = (ListView) findViewById(R.id.list_view_messages);
         lv.setAdapter(messageAdapter);
-        appendListView(new Message());
+        appendListView(new Message("test"));
     }
 
     public void onNewMessage(Message m){
@@ -93,14 +85,11 @@ public class messageBoardActivity extends Activity {
 
 
     public void appendListView(Message m){
-        adapter.add(m);
-        messageAdapter.add(m.getMessage());
+        messageAdapter.add(m);
     }
 
     public void refreshListView(Message m){
-        listItems.set(listItems.size() - 1, m);
-        messageList.set(messageList.size() - 1, m.getMessage());
-        adapter.notifyDataSetChanged();
+        messageAdapter.refreshListView(m);
         messageAdapter.notifyDataSetChanged();
     }
 
