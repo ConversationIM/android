@@ -1,35 +1,67 @@
 package com.example.sam.conversationalim;
 
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextWatcher;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
+
 import android.text.Editable;
+import android.widget.Toast;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.net.URISyntaxException;
 
 public class messageBoardActivity extends Activity {
 
     ListView lv;
     private MessageArrayAdapter messageAdapter;
-
-
+    private Socket mSocket;
+    private String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MTQ0NjkyNzM2MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSJ9.A2gcDVmoO95fm5-PL89fFakBfHgNTky1OJ_qLOdS6Cg";
+    JSONObject creds;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            mSocket = IO.socket("http://staging-magerko2.rhcloud.com");
+        }   catch (URISyntaxException e) {e.printStackTrace();}
+
+        try {
+             creds = new JSONObject("{ \n 'token': "+ token +",\n'room': "+ "default" + "\n}");
+        }
+        catch (JSONException e){e.printStackTrace();}
+
+
+
+        mSocket.on("connect", new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {
+                mSocket.emit("join", creds.toString());
+            }
+        }).on("error", new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {
+                Toast.makeText(getApplicationContext(), "E R O R E", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+        mSocket.connect();
+
+
+
         setContentView(R.layout.messageboard);
         final EditText mEditText = (EditText) findViewById(R.id.inputMsg);
         mEditText.addTextChangedListener(new TextWatcher() {
@@ -55,6 +87,10 @@ public class messageBoardActivity extends Activity {
         appendListView(new Message("test"));
     }
 
+    public Activity getActivity(){
+        return this;
+    }
+
     public void onNewMessage(Message m){
         appendListView(m);
     }
@@ -75,7 +111,8 @@ public class messageBoardActivity extends Activity {
     }
 
     public void sendMessage(JSONObject JSON){
-
+        //SOCKETS!
+        mSocket.emit("updated", JSON);
     }
 
     public Message decodeMessage(JSONObject JSON){
@@ -92,6 +129,8 @@ public class messageBoardActivity extends Activity {
         messageAdapter.refreshListView(m);
         messageAdapter.notifyDataSetChanged();
     }
+
+
 
 
 }

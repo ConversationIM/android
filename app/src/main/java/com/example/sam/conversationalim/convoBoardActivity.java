@@ -56,19 +56,19 @@ public class convoBoardActivity extends Activity{
     }
 
     public void addExampleUser(View view){
-            User dummy = new User("Victor", "pass");
+            User dummy = new User("email", "pw", "pw", "default", "name");
             newConversation(dummy);
     }
 
     public void addDemoUser(View view)
     {
-        User demo = new User("Demo", "pass");
+        User demo = new User("email", "pw", "default", "default", "pw");
         newConversation(demo);
     }
 
     private void newConversation(User user){ //new conversation with a user
         adapter.add(new Conversation(user));
-        nameAdapter.add(new Conversation(user).getOtherPerson().getUserName());
+        nameAdapter.add(new Conversation(user).getOtherPerson().getFirst());
 
     }
 
