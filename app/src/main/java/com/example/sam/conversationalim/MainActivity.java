@@ -12,6 +12,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,12 +70,51 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent();
-                intent.setClass(v.getContext(), convoBoardActivity.class);
-                String str = et2.getText().toString();
-                intent.putExtra("mystring", str);
-                startActivity(intent);
+//                Intent intent = new Intent();
+//                intent.setClass(v.getContext(), convoBoardActivity.class);
+////                String str = et2.getText().toString();
+////                intent.putExtra("mystring", str);
+//                startActivity(intent);
 
+                // Instantiate the RequestQueue.
+                RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                String url = "http://staging-magerko2.rhcloud.com/v1/auth";
+
+                // Request a string response from the provided URL.
+                JSONObject jsonBody = new JSONObject();
+                try {
+                    jsonBody.put("email", et2.getText());//"admin@example.com");
+                    jsonBody.put("password", et1.getText());//"password77");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                // Display the first 500 characters of the response string.
+//                                mTextView.setText("Response is: "+ response.substring(0,500));
+                                try {
+                                    Intent intent = new Intent();
+                                    intent.setClass(getApplicationContext(), convoBoardActivity.class);
+                                    String str = response.getJSONObject("data").getString("token");
+                                    intent.putExtra("token", str);
+                                    startActivity(intent);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "error",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+                // Add the request to the RequestQueue.
+                                queue.add(request);
 
 
             }
