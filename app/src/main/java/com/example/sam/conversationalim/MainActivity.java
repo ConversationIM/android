@@ -26,6 +26,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+
 public class MainActivity extends Activity {
     EditText et1, et2;
     boolean isOpen = false;
@@ -80,7 +82,7 @@ public class MainActivity extends Activity {
 
                 // Instantiate the RequestQueue.
                 progress = ProgressDialog.show(MainActivity.this, "Loading",
-                        "finding user", true);
+                        "Signing in", true);
                 RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
                 String url = "http://staging-magerko2.rhcloud.com/v1/auth";
 
@@ -108,15 +110,22 @@ public class MainActivity extends Activity {
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                     progress.dismiss();
-                                    Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "error" , Toast.LENGTH_LONG).show();
                                 }
                             }
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        String message = "An error occurred";
+                        if (error.networkResponse.data != null) {
+                            try {
+                                JSONObject response = new JSONObject(new String(error.networkResponse.data));
+                                message = response.getJSONArray("errors").getJSONObject(0).getString("message");
+                            } catch (JSONException e) { }
+                        }
                         error.printStackTrace();
                         progress.dismiss();
-                        Toast.makeText(getApplicationContext(), "error",
+                        Toast.makeText(getApplicationContext(), message,
                                 Toast.LENGTH_LONG).show();
                     }
                 });
