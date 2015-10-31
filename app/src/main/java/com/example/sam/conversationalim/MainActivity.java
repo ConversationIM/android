@@ -3,6 +3,7 @@ package com.example.sam.conversationalim;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
     boolean isOpen = false;
     AboutFrag f1;
     Button b;
+    ProgressDialog progress;
 
     //JSON final Variables
     private static final String TAG_SELF = "self", TAG_NEW = "new",
@@ -77,6 +79,8 @@ public class MainActivity extends Activity {
 //                startActivity(intent);
 
                 // Instantiate the RequestQueue.
+                progress = ProgressDialog.show(MainActivity.this, "Loading",
+                        "finding user", true);
                 RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
                 String url = "http://staging-magerko2.rhcloud.com/v1/auth";
 
@@ -99,9 +103,11 @@ public class MainActivity extends Activity {
                                     intent.setClass(getApplicationContext(), convoBoardActivity.class);
                                     String str = response.getJSONObject("data").getString("token");
                                     intent.putExtra("token", str);
+
                                     startActivity(intent);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
+                                    progress.dismiss();
                                     Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_LONG).show();
                                 }
                             }
@@ -109,6 +115,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        progress.dismiss();
                         Toast.makeText(getApplicationContext(), "error",
                                 Toast.LENGTH_LONG).show();
                     }
