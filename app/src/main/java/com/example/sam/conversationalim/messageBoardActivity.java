@@ -38,7 +38,6 @@ public class messageBoardActivity extends Activity {
             IO.Options opts = new IO.Options();
             opts.port = 80;
             mSocket = IO.socket("http://staging-magerko2.rhcloud.com", opts);
-            mSocket.connect();
             Log.i("Set Socket IO", "Socket IO Setting");
         }   catch (URISyntaxException e) {Log.e("Socket Problem", "Socket Setting", e);}
 
@@ -47,41 +46,11 @@ public class messageBoardActivity extends Activity {
         }
         catch (JSONException e){e.printStackTrace();}
 
-
-
-        mSocket.on("connect", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                mSocket.emit("join", creds);
-                Log.w("CONVIM", "connect has executed");
-            }
-        }).on("joined", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                Log.w("CONVIM", "joined successfully: " + args[0]);
-            }
-
-        }).on("error", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                Log.w("CONVIM", "error has executed: Error - " + args[0]);
-            }
-
-        }).on("updated", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                //if (lv == messageAdapter.getView(messageAdapter.size() - 1, lv, lv)) ;
-                JSONObject obj = (JSONObject) args[0];
-                refreshListView(decodeMessage(obj));
-                Log.w("CONVIM", "updated has executed");
-            }
-
-        });
-
-
+        mSocket.on("error", onError);
+        mSocket.on("updated", onUpdated);
+        mSocket.on("joined", onJoined);
+        mSocket.on("connect", onConnect);
+        mSocket.connect();
 
         setContentView(R.layout.messageboard);
         final EditText mEditText = (EditText) findViewById(R.id.inputMsg);
@@ -108,17 +77,14 @@ public class messageBoardActivity extends Activity {
         appendListView(new Message());
     }
 
+
     public void onNewMessage(Message m){
         appendListView(m);
     }
 
     public JSONObject encodeMessage(Message m){
         //refreshListView(m);
-        String JSON = "{\n" +
-                "    \"sender\": \"" + m.getSender() + "\",\n" +
-                "    \"room\": \"default\",\n" +
-                "    \"message\": \"" + m.getMessage() + "\"\n" +
-                "}";
+        String JSON = "{\n\"sender\": \"" + m.getSender() + "\",\n\"room\": \"default\",\n\"message\": \"" + m.getMessage() + "\"\n}";
         try {
             return new JSONObject(JSON);
         }
@@ -146,5 +112,67 @@ public class messageBoardActivity extends Activity {
         messageAdapter.refreshListView(m);
         messageAdapter.notifyDataSetChanged();
     }
+
+    private Activity getActivity(){
+        return this;
+    }
+
+    private Emitter.Listener onError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final String error = args[0].toString();
+            getActivity().runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "error" + error, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onJoined = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final String joinReceipt = args[0].toString();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.w("CONVIM", "joined successfully: " + joinReceipt);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onUpdated = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final JSONObject obj = (JSONObject) args[0];
+            getActivity().runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    refreshListView(decodeMessage(obj));
+                    Log.w("CONVIM", "updated has executed");
+                    Toast.makeText(getApplicationContext(), "updated", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onConnect = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSocket.emit("join", creds);
+                    Log.w("CONVIM", "connect has executed");
+                    Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    };
 
 }
