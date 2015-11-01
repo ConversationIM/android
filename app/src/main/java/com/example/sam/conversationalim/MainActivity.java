@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +35,7 @@ public class MainActivity extends Activity {
     AboutFrag f1;
     Button b;
     ProgressDialog progress;
+    private static String userName = "";
 
     //JSON final Variables
     private static final String TAG_SELF = "self", TAG_NEW = "new",
@@ -90,6 +92,7 @@ public class MainActivity extends Activity {
                 JSONObject jsonBody = new JSONObject();
                 try {
                     jsonBody.put("email", et2.getText());//"admin@example.com");
+                    userName = et2.getText().toString();
                     jsonBody.put("password", et1.getText());//"password77");
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -121,7 +124,8 @@ public class MainActivity extends Activity {
                             try {
                                 JSONObject response = new JSONObject(new String(error.networkResponse.data));
                                 message = response.getJSONArray("errors").getJSONObject(0).getString("message");
-                            } catch (JSONException e) { }
+                            } catch (JSONException e) {
+                                Log.e("login", "error", e); }
                         }
                         error.printStackTrace();
                         progress.dismiss();
@@ -148,6 +152,8 @@ public class MainActivity extends Activity {
     }
     */
 
+
+
     public void about(View view){
         if (isOpen) {//getFragmentManager().beginTransaction().remove(this).commit();
             MainActivity.this.getFragmentManager().beginTransaction().remove(f1).commit();
@@ -169,4 +175,9 @@ public class MainActivity extends Activity {
     public void resetTextEt2(View view) {
         et2.setText("");
     }
+
+    public static String getUserName(){
+        return userName;
+    }
+
 }

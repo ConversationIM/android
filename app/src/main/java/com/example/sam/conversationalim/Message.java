@@ -45,13 +45,13 @@ public class Message {
         }
     }
 
-    public Message(String message){
+    public Message(String message, String username){
 
 
         JSONObject clientEvent;
         try {
             clientEvent = new JSONObject("{\n" +
-                    "    \"sender\": \"testPerson\",\n" +
+                    "    \"sender\": \""+username+"\",\n" +
                     "    \"room\": \"default\",\n" +
                     "    \"message\": \"" + message + "\"\n" +
                     "}");

@@ -21,7 +21,7 @@
         android:ems="10"
         android:id="@+id/editText"
         android:layout_marginBottom="109dp"
-        android:text="password"
+        android:text="password77"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:onClick="resetTextEt1"/>
@@ -34,7 +34,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginBottom="33dp"
         android:layout_alignParentEnd="true"
-        android:text="username"
+        android:text="admin@example.com"
         android:onClick="resetTextEt2"/>
 
     <Button

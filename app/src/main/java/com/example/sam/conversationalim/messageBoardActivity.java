@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextWatcher;
 
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -34,11 +35,15 @@ public class messageBoardActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         try {
-            mSocket = IO.socket("http://staging-magerko2.rhcloud.com");
-        }   catch (URISyntaxException e) {e.printStackTrace();}
+            IO.Options opts = new IO.Options();
+            opts.port = 80;
+            mSocket = IO.socket("http://staging-magerko2.rhcloud.com", opts);
+            mSocket.connect();
+            Log.i("Set Socket IO", "Socket IO Setting");
+        }   catch (URISyntaxException e) {Log.e("Socket Problem", "Socket Setting", e);}
 
         try {
-             creds = new JSONObject("{ \n 'token': "+ token +",\n'room': "+ "default" + "\n}");
+             creds = new JSONObject("{ \n\"token\": "+ token +",\n\"room\": \"default\" \n}");
         }
         catch (JSONException e){e.printStackTrace();}
 
@@ -48,17 +53,33 @@ public class messageBoardActivity extends Activity {
 
             @Override
             public void call(Object... args) {
-                mSocket.emit("join", creds.toString());
+                mSocket.emit("join", creds);
+                Log.w("CONVIM", "connect has executed");
             }
+        }).on("joined", new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {
+                Log.w("CONVIM", "joined successfully: " + args[0]);
+            }
+
         }).on("error", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
-                Toast.makeText(getApplicationContext(), "E R O R E", Toast.LENGTH_SHORT).show();
+                Log.w("CONVIM", "error has executed: Error - " + args[0]);
+            }
+
+        }).on("updated", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //if (lv == messageAdapter.getView(messageAdapter.size() - 1, lv, lv)) ;
+                JSONObject obj = (JSONObject) args[0];
+                refreshListView(decodeMessage(obj));
+                Log.w("CONVIM", "updated has executed");
             }
 
         });
-        mSocket.connect();
 
 
 
@@ -72,7 +93,7 @@ public class messageBoardActivity extends Activity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                sendMessage(encodeMessage(new Message(mEditText.getText().toString())));
+                sendMessage(encodeMessage(new Message(mEditText.getText().toString(), MainActivity.getUserName())));
             }
 
             @Override
@@ -84,11 +105,7 @@ public class messageBoardActivity extends Activity {
         messageAdapter = new MessageArrayAdapter(getApplicationContext(), R.layout.activity_chat_singlemessage);
         lv = (ListView) findViewById(R.id.list_view_messages);
         lv.setAdapter(messageAdapter);
-        appendListView(new Message("test"));
-    }
-
-    public Activity getActivity(){
-        return this;
+        appendListView(new Message());
     }
 
     public void onNewMessage(Message m){
@@ -96,7 +113,7 @@ public class messageBoardActivity extends Activity {
     }
 
     public JSONObject encodeMessage(Message m){
-        refreshListView(m);
+        //refreshListView(m);
         String JSON = "{\n" +
                 "    \"sender\": \"" + m.getSender() + "\",\n" +
                 "    \"room\": \"default\",\n" +
@@ -110,7 +127,7 @@ public class messageBoardActivity extends Activity {
         }
     }
 
-    public void sendMessage(JSONObject JSON){
+    public void sendMessage(JSONObject JSON) {
         //SOCKETS!
         mSocket.emit("updated", JSON);
     }
@@ -129,8 +146,5 @@ public class messageBoardActivity extends Activity {
         messageAdapter.refreshListView(m);
         messageAdapter.notifyDataSetChanged();
     }
-
-
-
 
 }
