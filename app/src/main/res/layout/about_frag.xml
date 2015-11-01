@@ -7,8 +7,27 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text \n \n\n\n this is a demo"
+        android:text="About the project"
         android:id="@+id/textView2"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:id="@+id/description"
+        android:text="\n\n  This was a project started by Victor J for CS196 at UIUC. This app is an attempt at a more free-flowing instant messenger. \n\n   This is a demo currently."
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="8dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="\n\n\n\n    Team for ConversationalIM includes Nick M, Victor J, Sam R, Shane N, Dillon D, Rosanna C, Amy W, Vishaal G, and last but certainly not least, our project leader/CA, Eric Ahn."
+        android:id="@+id/textView4"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>
