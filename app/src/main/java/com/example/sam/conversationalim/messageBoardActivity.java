@@ -30,6 +30,7 @@ public class messageBoardActivity extends Activity {
     JSONObject creds;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,5 +175,6 @@ public class messageBoardActivity extends Activity {
             });
         }
     };
+
 
 }
