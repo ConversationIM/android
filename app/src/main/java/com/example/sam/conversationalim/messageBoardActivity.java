@@ -1,8 +1,8 @@
 package com.example.sam.conversationalim;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
+import io.socket.emitter.Emitter;
+import io.socket.client.IO;
+import io.socket.client.Socket;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -26,7 +26,7 @@ public class messageBoardActivity extends Activity {
     ListView lv;
     private MessageArrayAdapter messageAdapter;
     private Socket mSocket;
-    private String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MTQ0NjkyNzM2MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSJ9.A2gcDVmoO95fm5-PL89fFakBfHgNTky1OJ_qLOdS6Cg";
+    private String token = "";
     JSONObject creds;
 
 
@@ -35,17 +35,17 @@ public class messageBoardActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Bundle extras = getIntent().getExtras();
+        token = extras.getString("token");
+
         try {
             IO.Options opts = new IO.Options();
             opts.port = 80;
+            opts.forceNew = true;
+            opts.reconnection = false;
             mSocket = IO.socket("http://staging-magerko2.rhcloud.com", opts);
             Log.i("Set Socket IO", "Socket IO Setting");
         }   catch (URISyntaxException e) {Log.e("Socket Problem", "Socket Setting", e);}
-
-        try {
-             creds = new JSONObject("{ \n\"token\": "+ token +",\n\"room\": \"default\" \n}");
-        }
-        catch (JSONException e){e.printStackTrace();}
 
         mSocket.on("error", onError);
         mSocket.on("updated", onUpdated);
@@ -79,8 +79,11 @@ public class messageBoardActivity extends Activity {
     }
 
 
-    public void onNewMessage(Message m){
-        appendListView(m);
+    public void login(){
+        try {
+            creds = new JSONObject("{ \n\"token\": "+ token +",\n\"room\": \"default\" \n}");
+        }
+        catch (JSONException e){e.printStackTrace();}
     }
 
     public JSONObject encodeMessage(Message m){
@@ -126,8 +129,9 @@ public class messageBoardActivity extends Activity {
 
                 @Override
                 public void run() {
+                    Log.w("CONVIM", "error" + error);
                     Toast.makeText(getActivity().getApplicationContext(),
-                            "error" + error, Toast.LENGTH_LONG).show();
+                            "error: " + error, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -168,9 +172,11 @@ public class messageBoardActivity extends Activity {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    login();
                     mSocket.emit("join", creds);
                     Log.w("CONVIM", "connect has executed");
                     Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
+                    mSocket.disconnect();
                 }
             });
         }

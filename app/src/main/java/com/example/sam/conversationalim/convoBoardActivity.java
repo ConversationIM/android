@@ -46,6 +46,12 @@ public class convoBoardActivity extends Activity{
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent();
                 intent.setClass(view.getContext(), messageBoardActivity.class);
+
+                String newString;
+                Bundle extras = getIntent().getExtras();
+                newString = extras.getString("token");
+                String token = null;
+                intent.putExtra("token", newString);
                 startActivity(intent);
             }
         });
