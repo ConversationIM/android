@@ -1,5 +1,6 @@
 package com.example.sam.conversationalim;
 
+import io.socket.client.Ack;
 import io.socket.emitter.Emitter;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -51,6 +52,7 @@ public class messageBoardActivity extends Activity {
         mSocket.on("updated", onUpdated);
         mSocket.on("joined", onJoined);
         mSocket.on("connect", onConnect);
+        mSocket.open();
         mSocket.connect();
 
         setContentView(R.layout.messageboard);
@@ -79,11 +81,11 @@ public class messageBoardActivity extends Activity {
     }
 
 
-    public void login(){
+    public void initializeCredentials(){
         try {
             creds = new JSONObject("{ \n\"token\": "+ token +",\n\"room\": \"default\" \n}");
         }
-        catch (JSONException e){e.printStackTrace();}
+        catch (JSONException e){Log.w("JSON error : ", e);}
     }
 
     public JSONObject encodeMessage(Message m){
@@ -172,8 +174,13 @@ public class messageBoardActivity extends Activity {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    login();
-                    mSocket.emit("join", creds);
+                    initializeCredentials();
+                    Log.w("connection status ", mSocket.connected()?"true":"false");
+                    mSocket.emit("join", new Ack() {
+                        public void call(Object...args) {
+                            Log.w("Acknowledge: ", "join");
+                        }
+                    } ,creds);
                     Log.w("CONVIM", "connect has executed");
                     Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
                     mSocket.disconnect();
