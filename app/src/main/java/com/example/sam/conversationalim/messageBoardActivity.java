@@ -22,6 +22,9 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+
 public class messageBoardActivity extends Activity {
 
     ListView lv;
@@ -29,7 +32,6 @@ public class messageBoardActivity extends Activity {
     private Socket mSocket;
     private String token = "";
     JSONObject creds;
-
 
 
     @Override
@@ -40,20 +42,30 @@ public class messageBoardActivity extends Activity {
         token = extras.getString("token");
 
         try {
+            IO.setDefaultHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    //TODO: Make this more restrictive
+                    return true;
+                }
+            });
+
             IO.Options opts = new IO.Options();
             opts.port = 80;
-            opts.forceNew = true;
-            opts.reconnection = false;
-            mSocket = IO.socket("http://staging-magerko2.rhcloud.com", opts);
+            //opts.forceNew = true;
+            //opts.reconnection = false;
+            mSocket = IO.socket("http://staging-magerko2.rhcloud.com/mvp", opts);
             Log.i("Set Socket IO", "Socket IO Setting");
         }   catch (URISyntaxException e) {Log.e("Socket Problem", "Socket Setting", e);}
+
+
 
         mSocket.on("error", onError);
         mSocket.on("updated", onUpdated);
         mSocket.on("joined", onJoined);
         mSocket.on("connect", onConnect);
-        mSocket.open();
         mSocket.connect();
+
 
         setContentView(R.layout.messageboard);
         final EditText mEditText = (EditText) findViewById(R.id.inputMsg);
@@ -131,7 +143,7 @@ public class messageBoardActivity extends Activity {
 
                 @Override
                 public void run() {
-                    Log.w("CONVIM", "error" + error);
+                    Log.w("CONVIM", "error " + error);
                     Toast.makeText(getActivity().getApplicationContext(),
                             "error: " + error, Toast.LENGTH_LONG).show();
                 }
@@ -168,6 +180,12 @@ public class messageBoardActivity extends Activity {
         }
     };
 
+    Ack a =  new Ack() {
+        public void call(Object... args) {
+            Log.w("Acknowledge: ", "join");
+        }
+    };
+
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -175,15 +193,11 @@ public class messageBoardActivity extends Activity {
                 @Override
                 public void run() {
                     initializeCredentials();
-                    Log.w("connection status ", mSocket.connected()?"true":"false");
-                    mSocket.emit("join", new Ack() {
-                        public void call(Object...args) {
-                            Log.w("Acknowledge: ", "join");
-                        }
-                    } ,creds);
-                    Log.w("CONVIM", "connect has executed");
-                    Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
-                    mSocket.disconnect();
+                    //Log.w("connection status ", mSocket.connected() ? "true" : "false");
+                    mSocket.emit("join", creds);
+                    //Log.w("CONVIM", "connect has executed");
+                    //Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
+                    //mSocket.disconnect();
                 }
             });
         }
