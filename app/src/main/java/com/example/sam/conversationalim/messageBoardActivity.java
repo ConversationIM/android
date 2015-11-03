@@ -42,14 +42,6 @@ public class messageBoardActivity extends Activity {
         token = extras.getString("token");
 
         try {
-            IO.setDefaultHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    //TODO: Make this more restrictive
-                    return true;
-                }
-            });
-
             IO.Options opts = new IO.Options();
             opts.port = 80;
             //opts.forceNew = true;
@@ -180,11 +172,7 @@ public class messageBoardActivity extends Activity {
         }
     };
 
-    Ack a =  new Ack() {
-        public void call(Object... args) {
-            Log.w("Acknowledge: ", "join");
-        }
-    };
+
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
