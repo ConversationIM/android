@@ -86,7 +86,8 @@ public class MainActivity extends Activity {
                 progress = ProgressDialog.show(MainActivity.this, "Loading",
                         "Signing in", true);
                 RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-                String url = "http://staging-magerko2.rhcloud.com/v1/auth";
+                //String url = "http://staging-magerko2.rhcloud.com/v1/a";
+                String url = "http://nma55251.pagekite.me/v1/auth";
 
                 // Request a string response from the provided URL.
                 JSONObject jsonBody = new JSONObject();

@@ -20,18 +20,27 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
 
 public class messageBoardActivity extends Activity {
 
     ListView lv;
     private MessageArrayAdapter messageAdapter;
     private Socket mSocket;
-    private String token = "";
-    JSONObject creds;
+    private String token;
+
+    {
+        try {
+            //mSocket = IO.socket("http://staging-magerko2.rhcloud.com/mvp");
+            mSocket = IO.socket("http://nma55251.pagekite.me/mvp");
+            Log.i("ConversationIM", "Initializing socket connection");
+        } catch (URISyntaxException e) {
+            Log.e("ConversationIM", "Problem while initializing", e);
+        }
+    }
 
 
     @Override
@@ -41,64 +50,95 @@ public class messageBoardActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         token = extras.getString("token");
 
-        try {
-            IO.Options opts = new IO.Options();
-            opts.port = 80;
-            //opts.forceNew = true;
-            //opts.reconnection = false;
-            mSocket = IO.socket("http://staging-magerko2.rhcloud.com/mvp", opts);
-            Log.i("Set Socket IO", "Socket IO Setting");
-        }   catch (URISyntaxException e) {Log.e("Socket Problem", "Socket Setting", e);}
+        mSocket.on("error", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                Log.d("ConversationIM", "args length: " + args.length);
+                Error error = new Error(args[0].toString());
+                Throwable t = (Throwable) args[0];
+                StringWriter sw = new StringWriter();
+                t.printStackTrace(new PrintWriter(sw));
+                Log.d("ConversationIM", String.format("An error ocurred: %s", sw.toString()));
+                //Toast.makeText(getActivity().getApplicationContext(), "error: " + error, Toast.LENGTH_LONG).show();
+            }
+        })/*.on("updated", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                final JSONObject obj = (JSONObject) args[0];
+                refreshListView(decodeMessage(obj));
+                Log.w("CONVIM", "updated has executed");
+                //Toast.makeText(getApplicationContext(), "updated", Toast.LENGTH_SHORT).show();
+            }
 
-
-
-        mSocket.on("error", onError);
-        mSocket.on("updated", onUpdated);
-        mSocket.on("joined", onJoined);
-        mSocket.on("connect", onConnect);
+        })*/.on("joined", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        String joinReceipt = args[0].toString();
+                        Log.w("ConversationIM", "joined successfully: " + joinReceipt);
+                    }
+                }
+        ).on("connect", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                JSONObject joinRequest = makeJoinRequest();
+                Log.i("ConversationIM", "Connected: now attempting to join room...");
+                Log.d("ConversationIM", joinRequest.toString());
+                mSocket.emit("join", joinRequest);
+                //Log.w("CONVIM", "connect has executed");
+                //Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
+                //mSocket.disconnect();
+            }
+        });
         mSocket.connect();
 
 
         setContentView(R.layout.messageboard);
         final EditText mEditText = (EditText) findViewById(R.id.inputMsg);
-        mEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        mEditText.addTextChangedListener(
+                new TextWatcher() {
+                   @Override
+                   public void beforeTextChanged(CharSequence charSequence, int i, int i1,
+                                                 int i2) {
 
-            }
+                   }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                sendMessage(encodeMessage(new Message(mEditText.getText().toString(), MainActivity.getUserName())));
-            }
+                   @Override
+                   public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                       sendMessage(encodeMessage(new Message(mEditText.getText().toString(), MainActivity.getUserName())));
+                   }
 
-            @Override
-            public void afterTextChanged(Editable editable) {
+                   @Override
+                   public void afterTextChanged(Editable editable) {
 
-            }
-        });
+                   }
+                });
 
         messageAdapter = new MessageArrayAdapter(getApplicationContext(), R.layout.activity_chat_singlemessage);
         lv = (ListView) findViewById(R.id.list_view_messages);
+
         lv.setAdapter(messageAdapter);
+
         appendListView(new Message());
     }
 
 
-    public void initializeCredentials(){
+    public JSONObject makeJoinRequest() {
+        JSONObject joinRequest = null;
         try {
-            creds = new JSONObject("{ \n\"token\": "+ token +",\n\"room\": \"default\" \n}");
+            joinRequest = new JSONObject("{ \n\"token\": " + token + ",\n\"room\": \"default\" \n}");
+        } catch (JSONException e) {
+            Log.w("JSON error : ", e);
         }
-        catch (JSONException e){Log.w("JSON error : ", e);}
+
+        return joinRequest;
     }
 
-    public JSONObject encodeMessage(Message m){
+    public JSONObject encodeMessage(Message m) {
         //refreshListView(m);
         String JSON = "{\n\"sender\": \"" + m.getSender() + "\",\n\"room\": \"default\",\n\"message\": \"" + m.getMessage() + "\"\n}";
         try {
             return new JSONObject(JSON);
-        }
-        catch(JSONException e){
+        } catch (JSONException e) {
             return null;
         }
     }
@@ -108,88 +148,24 @@ public class messageBoardActivity extends Activity {
         mSocket.emit("updated", JSON);
     }
 
-    public Message decodeMessage(JSONObject JSON){
+    public Message decodeMessage(JSONObject JSON) {
         refreshListView(new Message(JSON));
         return new Message(JSON);
     }
 
 
-    public void appendListView(Message m){
+    public void appendListView(Message m) {
         messageAdapter.add(m);
     }
 
-    public void refreshListView(Message m){
+    public void refreshListView(Message m) {
         messageAdapter.refreshListView(m);
         messageAdapter.notifyDataSetChanged();
     }
 
-    private Activity getActivity(){
+    private Activity getActivity() {
         return this;
     }
-
-    private Emitter.Listener onError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            final String error = args[0].toString();
-            getActivity().runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    Log.w("CONVIM", "error " + error);
-                    Toast.makeText(getActivity().getApplicationContext(),
-                            "error: " + error, Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onJoined = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            final String joinReceipt = args[0].toString();
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.w("CONVIM", "joined successfully: " + joinReceipt);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onUpdated = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            final JSONObject obj = (JSONObject) args[0];
-            getActivity().runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    refreshListView(decodeMessage(obj));
-                    Log.w("CONVIM", "updated has executed");
-                    Toast.makeText(getApplicationContext(), "updated", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    };
-
-
-
-    private Emitter.Listener onConnect = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    initializeCredentials();
-                    //Log.w("connection status ", mSocket.connected() ? "true" : "false");
-                    mSocket.emit("join", creds);
-                    //Log.w("CONVIM", "connect has executed");
-                    //Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
-                    //mSocket.disconnect();
-                }
-            });
-        }
-    };
 
 
 }
