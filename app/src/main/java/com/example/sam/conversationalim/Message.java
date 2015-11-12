@@ -18,11 +18,12 @@ public class Message {
             clientEvent = new JSONObject("{\n" +
                     "    \"sender\": \"testPerson\",\n" +
                     "    \"room\": \"default\",\n" +
-                    "    \"message\": \"Hello World!!!\"\n" +
+                    "    \"message\": \" \"\n" +
                     "}");
             message = clientEvent.getString("message");
             room = clientEvent.getString("room");
             sender = clientEvent.getString("sender");
+            setLeft((sender.equals(MainActivity.getUserName()))? false:true);
         }
         catch (JSONException e){
             message = e.toString();
@@ -35,7 +36,7 @@ public class Message {
 
         try {
             this.message = message.getString("message");
-            room = message.getString("room");
+            room = "default";
             sender = message.getString("sender");
         }
         catch (JSONException e){
@@ -43,27 +44,14 @@ public class Message {
             room = e.toString();
             sender = e.toString();
         }
+        setLeft((sender.equals(MainActivity.getUserName()))? false:true);
     }
 
     public Message(String message, String username){
-
-
-        JSONObject clientEvent;
-        try {
-            clientEvent = new JSONObject("{\n" +
-                    "    \"sender\": \""+username+"\",\n" +
-                    "    \"room\": \"default\",\n" +
-                    "    \"message\": \"" + message + "\"\n" +
-                    "}");
-            this.message = clientEvent.getString("message");
-            room = clientEvent.getString("room");
-            sender = clientEvent.getString("sender");
-        }
-        catch (JSONException e){
-            this.message = e.toString();
-            room = e.toString();
-            sender = e.toString();
-        }
+        this.message = message;
+        room = "default";
+        sender = username;
+        setLeft((sender.equals(MainActivity.getUserName()))? false:true);
     }
 
 
