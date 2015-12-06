@@ -44,7 +44,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NewConversationActivity"
+            android:name=".CreateConversationActivity"
             android:label="@string/title_activity_new_conversation"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

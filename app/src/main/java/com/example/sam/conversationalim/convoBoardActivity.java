@@ -81,7 +81,7 @@ public class convoBoardActivity extends Activity{
     private void newConversation(User user){ //new conversation with a user
 
         Intent intent = new Intent();
-        intent.setClass(getApplicationContext(), NewConversationActivity.class);
+        intent.setClass(getApplicationContext(), CreateConversationActivity.class);
         String newString;
         Bundle extras = getIntent().getExtras();
         newString = extras.getString("token");
