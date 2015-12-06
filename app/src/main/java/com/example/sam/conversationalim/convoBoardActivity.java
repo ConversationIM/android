@@ -47,6 +47,12 @@ public class convoBoardActivity extends Activity{
                 Intent intent = new Intent();
                 intent.setClass(view.getContext(), messageBoardActivity.class);
 
+                String conversationTitle = getIntent().getExtras().getString("newRoom");
+                String conversationId = getIntent().getExtras().getString("conversationID");
+
+
+                if(conversationTitle != null) addConvoToList(conversationId, conversationTitle);
+
                 String newString;
                 Bundle extras = getIntent().getExtras();
                 newString = extras.getString("token");
@@ -73,9 +79,24 @@ public class convoBoardActivity extends Activity{
     }
 
     private void newConversation(User user){ //new conversation with a user
+
+        Intent intent = new Intent();
+        intent.setClass(getApplicationContext(), NewConversationActivity.class);
+        String newString;
+        Bundle extras = getIntent().getExtras();
+        newString = extras.getString("token");
+        String token = null;
+        intent.putExtra("token", newString);
+        startActivity(intent);
+
         adapter.add(new Conversation(user));
         nameAdapter.add(new Conversation(user).getOtherPerson().getFirst());
 
+    }
+
+    public void addConvoToList(String id, String name){
+        adapter.add(new Conversation(id, name));
+        nameAdapter.add(name);
     }
 
 

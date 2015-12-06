@@ -121,12 +121,18 @@ public class MainActivity extends Activity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         String message = "An error occurred";
-                        if (error.networkResponse.data != null) {
-                            try {
-                                JSONObject response = new JSONObject(new String(error.networkResponse.data));
-                                message = response.getJSONArray("errors").getJSONObject(0).getString("message");
-                            } catch (JSONException e) {
-                                Log.e("login", "error", e); }
+                        try {
+                            if (error.networkResponse.data != null) {
+                                try {
+                                    JSONObject response = new JSONObject(new String(error.networkResponse.data));
+                                    message = response.getJSONArray("errors").getJSONObject(0).getString("message");
+                                } catch (JSONException e) {
+                                    Log.e("login", "error", e);
+                                }
+                            }
+                        }
+                        catch (NullPointerException e) {
+                            Log.e("login", "error", e);
                         }
                         error.printStackTrace();
                         progress.dismiss();

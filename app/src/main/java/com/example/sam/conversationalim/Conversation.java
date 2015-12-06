@@ -10,14 +10,21 @@ public class Conversation {
     private String name;
     private String sessionId;
 
+    private String conversationID;
+    private String title;
+
+
     public Conversation(){ otherPerson = null; }
+
+    public Conversation(String conversationID, String title){
+        this.conversationID = conversationID;
+        this.title = title;
+    }
+
     public Conversation(User otherPerson){
         this.otherPerson = otherPerson;
     }
 
-    public void addMessage(Message m){
-
-    }
 
     public User getOtherPerson() {
         return otherPerson;
