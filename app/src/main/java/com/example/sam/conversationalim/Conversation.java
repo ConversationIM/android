@@ -29,4 +29,13 @@ public class Conversation {
     public User getOtherPerson() {
         return otherPerson;
     }
+
+    @Override
+    public String toString(){
+        return title + "\n" + conversationID;
+    }
+
+    public String getConversationID(){
+        return conversationID;
+    }
 }

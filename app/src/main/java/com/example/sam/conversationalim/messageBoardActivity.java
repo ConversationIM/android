@@ -6,7 +6,14 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextWatcher;
 
 import android.util.Log;
@@ -31,81 +38,38 @@ public class messageBoardActivity extends Activity {
     EditText textBox;
     ListView lv;
     private MessageArrayAdapter messageAdapter;
-    private Socket mSocket;
-    private String token;
+    private SOCKETZANDSHIT socketService;
     private String newline = System.getProperty("line.separator");
-    {
-        try {
-            mSocket = IO.socket("http://staging-magerko2.rhcloud.com/mvp");
-            //mSocket = IO.socket("http://nma55251.pagekite.me/mvp");
-            Log.i("ConversationIM", "Initializing socket connection");
-        } catch (URISyntaxException e) {
-            Log.e("ConversationIM", "Problem while initializing", e);
-        }
-    }
+    MyReceiver myReceiver;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle extras = getIntent().getExtras();
-        token = extras.getString("token");
+        ServiceConnection mServerConn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d("connected to service", "onServiceConnected");
+                SOCKETZANDSHIT.MyLocalBinder binder = (SOCKETZANDSHIT.MyLocalBinder) service;
+                socketService = binder.getService();
+            }
 
-        mSocket.on("error", new Emitter.Listener() {
             @Override
-            public void call(final Object... args) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("ConversationIM", "args length: " + args.length);
-                        Error error = new Error(args[0].toString());
-                        Throwable t = (Throwable) args[0];
-                        StringWriter sw = new StringWriter();
-                        t.printStackTrace(new PrintWriter(sw));
-                        Log.d("ConversationIM", String.format("An error ocurred: %s", sw.toString()));
-                        //Toast.makeText(getActivity().getApplicationContext(), "error: " + error, Toast.LENGTH_LONG).show();
-                    }
-                });
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d("disconnected service", "onServiceDisconnected");
             }
-        }).on("updated", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                final JSONObject obj = (JSONObject) args[0];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (obj.getString("message").contains(newline)) {
-                                messageAdapter.add(new Message());
-                                textBox.setText("");
-                            }
-                            else refreshListView(decodeMessage(obj));
-                        }catch(JSONException e){}
-                        Log.w("CONVIM", decodeMessage(obj).getMessage());
-                    }
-                });
-            }
-        }).on("joined", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        String joinReceipt = args[0].toString();
-                        Log.w("ConversationIM", "joined successfully: " + joinReceipt);
-                    }
-                }
-        ).on("connect", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                JSONObject joinRequest = makeJoinRequest();
-                Log.i("ConversationIM", "Connected: now attempting to join room...");
-                Log.d("ConversationIM", joinRequest.toString());
-                mSocket.emit("join", joinRequest.toString());
-                //Log.w("CONVIM", "connect has executed");
-                //Toast.makeText(getApplicationContext(), "connect", Toast.LENGTH_SHORT).show();
-                //mSocket.disconnect();
-            }
-        });
-        mSocket.connect();
+        };
+
+        myReceiver = new MyReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(SOCKETZANDSHIT.MY_ACTION);
+        registerReceiver(myReceiver, intentFilter);
+
+        Intent serviceIntent = new Intent();
+        serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+        getApplicationContext().bindService(serviceIntent, mServerConn, getApplicationContext().BIND_AUTO_CREATE);
+
 
 
         setContentView(R.layout.messageboard);
@@ -136,19 +100,27 @@ public class messageBoardActivity extends Activity {
         lv.setAdapter(messageAdapter);
 
         appendListView(new Message());
+
+    }
+
+    public messageBoardActivity getThis(){
+        Log.w("getThis", "called Successfully");
+        return this;
     }
 
 
-    public JSONObject makeJoinRequest() {
-        JSONObject joinRequest = null;
+    public void onUpdated(JSONObject obj){
         try {
-            joinRequest = new JSONObject("{ \n\"token\": " + token + ",\n\"room\": \"default\" \n}");
+            if (obj.getString("message").contains(newline)) {
+                messageAdapter.add(new Message());
+                textBox.setText("");
+            } else refreshListView(decodeMessage(obj));
         } catch (JSONException e) {
-            Log.w("JSON error : ", e);
-        }
 
-        return joinRequest;
+        }
+        Log.w("CONVIM", decodeMessage(obj).getMessage());
     }
+
 
     public JSONObject encodeMessage(Message m) {
         //refreshListView(m);
@@ -157,7 +129,7 @@ public class messageBoardActivity extends Activity {
 
         try {
             encodedMessage.put("sender", m.getSender());
-            encodedMessage.put("room", "default");
+            encodedMessage.put("conversationId", socketService.getConversationId());
             encodedMessage.put("message", m.getMessage());
         } catch (JSONException e) {
             Log.w("JSON error : ", e);
@@ -165,13 +137,20 @@ public class messageBoardActivity extends Activity {
         return encodedMessage;
     }
 
-    public void sendMessage(JSONObject JSON) {
+    public void sendMessage(JSONObject obj) {
+        /*try {
+            if (obj.getString("message").contains(newline)) {
+                messageAdapter.add(new Message());
+                textBox.setText("");
+            } else refreshListView(decodeMessage(obj));
+        } catch (JSONException e) {
+
+        }*/
         //SOCKETS!
         try {
-            Log.d("ConversationIM", JSON.toString());
-            mSocket.emit("updated", JSON.toString());
-        }
-        catch(NullPointerException e){
+            Log.d("MESSAGE being SENT", obj.toString());
+            socketService.emit("updated", obj.toString());
+        } catch (NullPointerException e) {
             Log.e("null pointer!!!", "error", e);
         }
     }
@@ -194,6 +173,25 @@ public class messageBoardActivity extends Activity {
 
     private Activity getActivity() {
         return this;
+    }
+
+    private class MyReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context arg0, Intent arg1) {
+            // TODO Auto-generated method stub
+
+            String datapassed = arg1.getExtras().getString("updateEvent");
+            Log.w("Triggered by Service!" , String.valueOf(datapassed));
+            try{
+                JSONObject obj = new JSONObject(datapassed);
+                onUpdated(obj);
+            }catch(JSONException e){
+
+            }
+
+        }
+
     }
 
 

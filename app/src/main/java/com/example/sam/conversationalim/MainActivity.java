@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +39,7 @@ public class MainActivity extends Activity {
     Button b;
     ProgressDialog progress;
     private static String userName = "";
+    private SOCKETZANDSHIT socketService;
 
     //JSON final Variables
     private static final String TAG_SELF = "self", TAG_NEW = "new",
@@ -44,6 +48,28 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        ServiceConnection mServerConn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d("connected to service", "onServiceConnected");
+                SOCKETZANDSHIT.MyLocalBinder binder = (SOCKETZANDSHIT.MyLocalBinder) service;
+                socketService = binder.getService();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d("disconnected service", "onServiceDisconnected");
+            }
+        };
+
+        Intent serviceIntent = new Intent();
+        serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+        getApplicationContext().bindService(serviceIntent, mServerConn, getApplicationContext().BIND_AUTO_CREATE);
+
+
+
         setContentView(R.layout.activity_main);
         ImageView iv = (ImageView) findViewById(R.id.imageView);
         iv.setImageResource(R.drawable.conversation_im);
@@ -87,7 +113,7 @@ public class MainActivity extends Activity {
                         "Signing in", true);
                 RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
                 String url = "http://staging-magerko2.rhcloud.com/v1/auth";
-                //String url = "http://nma55251.pagekite.me/v1/auth";
+
 
                 // Request a string response from the provided URL.
                 JSONObject jsonBody = new JSONObject();
@@ -106,10 +132,14 @@ public class MainActivity extends Activity {
 //                                mTextView.setText("Response is: "+ response.substring(0,500));
                                 try {
                                     Intent intent = new Intent();
+                                    Intent serviceIntent = new Intent();
+                                    serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
                                     intent.setClass(getApplicationContext(), convoBoardActivity.class);
                                     String str = response.getJSONObject("data").getString("token");
-                                    intent.putExtra("token", str);
-
+                                    serviceIntent.putExtra("token", str);
+                                    serviceIntent.putExtra("conversationName", "default");
+                                    serviceIntent.putExtra("conversationId", "default");
+                                    startService(serviceIntent);
                                     startActivity(intent);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -158,7 +188,11 @@ public class MainActivity extends Activity {
         ft.commit();
     }
     */
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
 
+    }
 
 
     public void about(View view){

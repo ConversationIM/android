@@ -8,6 +8,14 @@
     android:background="@drawable/background"
     android:orientation="vertical" >
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh Conversation List"
+        android:id="@+id/button"
+        android:layout_gravity="right"
+        android:onClick="refreshListView"/>
+
     <ListView
         android:id="@+id/list"
         android:layout_width="fill_parent"
@@ -25,9 +33,10 @@
         android:layout_height="wrap_content"
         android:text="New Message"
         android:id="@+id/newMessage"
-        android:layout_gravity="right"
-        android:onClick="addExampleUser"
-        />
+        android:layout_gravity="center_horizontal"
+        android:onClick="createNewConversation"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
 
 
 </LinearLayout>
