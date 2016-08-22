@@ -38,7 +38,7 @@ public class messageBoardActivity extends Activity {
     EditText textBox;
     ListView lv;
     private MessageArrayAdapter messageAdapter;
-    private SOCKETZANDSHIT socketService;
+    private SocketsMain socketService;
     private String newline = System.getProperty("line.separator");
     MyReceiver myReceiver;
 
@@ -51,7 +51,7 @@ public class messageBoardActivity extends Activity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.d("connected to service", "onServiceConnected");
-                SOCKETZANDSHIT.MyLocalBinder binder = (SOCKETZANDSHIT.MyLocalBinder) service;
+                SocketsMain.MyLocalBinder binder = (SocketsMain.MyLocalBinder) service;
                 socketService = binder.getService();
             }
 
@@ -63,11 +63,11 @@ public class messageBoardActivity extends Activity {
 
         myReceiver = new MyReceiver();
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(SOCKETZANDSHIT.MY_ACTION);
+        intentFilter.addAction(SocketsMain.MY_ACTION);
         registerReceiver(myReceiver, intentFilter);
 
         Intent serviceIntent = new Intent();
-        serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+        serviceIntent.setClass(getApplicationContext(), SocketsMain.class);
         getApplicationContext().bindService(serviceIntent, mServerConn, getApplicationContext().BIND_AUTO_CREATE);
 
 

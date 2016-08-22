@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
     Button b;
     ProgressDialog progress;
     private static String userName = "";
-    private SOCKETZANDSHIT socketService;
+    private SocketsMain socketService;
 
     //JSON final Variables
     private static final String TAG_SELF = "self", TAG_NEW = "new",
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.d("connected to service", "onServiceConnected");
-                SOCKETZANDSHIT.MyLocalBinder binder = (SOCKETZANDSHIT.MyLocalBinder) service;
+                SocketsMain.MyLocalBinder binder = (SocketsMain.MyLocalBinder) service;
                 socketService = binder.getService();
             }
 
@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
         };
 
         Intent serviceIntent = new Intent();
-        serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+        serviceIntent.setClass(getApplicationContext(), SocketsMain.class);
         getApplicationContext().bindService(serviceIntent, mServerConn, getApplicationContext().BIND_AUTO_CREATE);
 
 
@@ -133,7 +133,7 @@ public class MainActivity extends Activity {
                                 try {
                                     Intent intent = new Intent();
                                     Intent serviceIntent = new Intent();
-                                    serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+                                    serviceIntent.setClass(getApplicationContext(), SocketsMain.class);
                                     intent.setClass(getApplicationContext(), convoBoardActivity.class);
                                     String str = response.getJSONObject("data").getString("token");
                                     serviceIntent.putExtra("token", str);

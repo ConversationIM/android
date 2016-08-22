@@ -28,7 +28,7 @@ public class convoBoardActivity extends Activity{
     ListView lv;
     ArrayList<Conversation> listItems = new ArrayList<>();
     ArrayAdapter<Conversation> adapter;
-    SOCKETZANDSHIT socketService;
+    SocketsMain socketService;
 
     String conversationName;
     String conversationId;
@@ -56,7 +56,7 @@ public class convoBoardActivity extends Activity{
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.d("connect CONVOBOARD", "onServiceConnected");
-                SOCKETZANDSHIT.MyLocalBinder binder = (SOCKETZANDSHIT.MyLocalBinder) service;
+                SocketsMain.MyLocalBinder binder = (SocketsMain.MyLocalBinder) service;
                 socketService = binder.getService();
                 try {
                     for (int i = 0; i < listItems.size(); i++) {
@@ -75,7 +75,7 @@ public class convoBoardActivity extends Activity{
         };
 
         Intent serviceIntent = new Intent();
-        serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+        serviceIntent.setClass(getApplicationContext(), SocketsMain.class);
         getApplicationContext().bindService(serviceIntent, mServerConn, getApplicationContext().BIND_AUTO_CREATE);
 
 

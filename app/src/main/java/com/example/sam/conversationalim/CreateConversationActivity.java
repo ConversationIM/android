@@ -45,7 +45,7 @@ public class CreateConversationActivity extends AppCompatActivity {
 
     private EditText eT3;
     private EditText eT4;
-    private SOCKETZANDSHIT socketService;
+    private SocketsMain socketService;
 
 
     @Override
@@ -55,7 +55,7 @@ public class CreateConversationActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.d("connected to service", "onServiceConnected");
-                SOCKETZANDSHIT.MyLocalBinder binder = (SOCKETZANDSHIT.MyLocalBinder) service;
+                SocketsMain.MyLocalBinder binder = (SocketsMain.MyLocalBinder) service;
                 socketService = binder.getService();
             }
 
@@ -66,7 +66,7 @@ public class CreateConversationActivity extends AppCompatActivity {
         };
 
         Intent serviceIntent = new Intent();
-        serviceIntent.setClass(getApplicationContext(), SOCKETZANDSHIT.class);
+        serviceIntent.setClass(getApplicationContext(), SocketsMain.class);
         getApplicationContext().bindService(serviceIntent, mServerConn, getApplicationContext().BIND_AUTO_CREATE);
     }
 
